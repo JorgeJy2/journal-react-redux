@@ -1,29 +1,51 @@
-import React from 'react'
+import React from 'react';
+import dayjs from "dayjs";
+import { useDispatch } from 'react-redux';
+import { activeNote } from '../../actions/notes';
+const advancedFormat = require("dayjs/plugin/advancedFormat");
+dayjs.extend(advancedFormat);
 
-export const JournalEntry = () => {
+export const JournalEntry = ({ id, body, title, date, url }) => {
+    const day = dayjs(date);
+    const dispatch = useDispatch();
+
+
+    const handleEntryClick = () => {
+        dispatch(activeNote(id, {
+            body,
+            title,
+            date,
+            url,
+        }));
+    }
+
     return (
-        <div className="journal__entry pointer">
-            <div 
-                className="journal__entry-picture"
-                style={{
-                    backgroundSize: 'cover',
-                    backgroundImage: 'url(https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?ixid=MXwxMjA3fDB8MHxzZWFyY2h8MXx8aHVtYW58ZW58MHx8MHw%3D&ixlib=rb-1.2.1&w=1000&q=80)'
-                }}
-            >
-            </div>
-
+        <div
+            onClick={handleEntryClick}
+            className="journal__entry pointer">
+            {
+                url &&
+                <div
+                    className="journal__entry-picture"
+                    style={{
+                        backgroundSize: 'cover',
+                        backgroundImage: `url(${url})`
+                    }}
+                >
+                </div>
+            }
             <div className="journal__entry-body">
                 <p className="journal_entry-title">
-                    U be happy
+                    {title}
                 </p>
                 <p className="journal_entry-content">
-                    Do ullamco occaecat minim non aute.
+                    {body}
                 </p>
             </div>
 
             <div className="journal__entry-date-box">
-                <span>Monday</span>
-                <h4>28</h4>
+                <span>{day.format("dddd")}</span>
+                <h4>{day.format("Do")}</h4>
             </div>
         </div>
     )
