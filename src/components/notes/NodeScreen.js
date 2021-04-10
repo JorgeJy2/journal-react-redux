@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { activeNote } from '../../actions/notes';
+import { activeNote, startDeleting } from '../../actions/notes';
 import { useForm } from '../../hooks/useForm';
 import { NotesAppBar } from './NotesAppBar'
 
@@ -9,16 +9,28 @@ export const NodeScreen = () => {
     
     const dispatch = useDispatch();
 
-    const [formValues, handleInputChange] = useForm(note);
+    const [formValues, handleInputChange, reset ] = useForm(note);
 
     const { body, title } = formValues;
 
+    const activeId = useRef(note.id);
+
     useEffect(() => {
-        console.log(formValues);
+        if(note.id !== activeId.current) {
+            reset(note);
+            activeId.current = note.id;
+        }
+    }, [formValues, reset]);
+
+    useEffect(() => {
         dispatch(activeNote(note.id, {
-            ...formValues
-        }));
-    }, [formValues, dispatch]);
+                 ...formValues
+            }));
+    }, [formValues]);
+
+    const handleDelete = () =>{
+        dispatch(startDeleting(note.id));
+    };
 
     return (
         <div className="nodes_main-content">
@@ -46,11 +58,17 @@ export const NodeScreen = () => {
                 (note.url) 
                 &&
                     <div className="notes__image">
-                        <img src="https://images.ctfassets.net/hrltx12pl8hq/6bi6wKIM5DDM5U1PtGVFcP/1c7fce6de33bb6575548a646ff9b03aa/nature-photography-pictures.jpg?fit=fill&w=800&h=300"
+                        <img src={note.url}
                             alt="image"
                         />
                     </div>
             }
+
+            <button
+                onClick={handleDelete} 
+                className="btn btn-danger" >
+                Delete
+            </button>
         </div>
     )
 }
