@@ -24,4 +24,4 @@ export const fileUpload = async (file) =>{
         throw error;
     }
 
-}
+};

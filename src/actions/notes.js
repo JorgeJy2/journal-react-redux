@@ -4,23 +4,27 @@ import { types } from "../types/types";
 import Swal from 'sweetalert2';
 import { fileUpload } from "../helpers/fileUpload";
 
-
 export const startNewNote = () => {
     return async (dispatch, getState) => {
         const uid = getState().auth.uid;
         const newNote = {
-            title: 'Services',
-            body: 'Services',
+            title: '',
+            body: '',
             date: new Date().getTime()
         };
 
-        const doc =
-            await db
-                .collection(`${uid}/journal/notes`)
-                .add(newNote);
+        try {
+            const doc =
+                await db
+                    .collection(`${uid}/journal/notes`)
+                    .add(newNote);
 
-        dispatch(activeNote(doc.id, newNote));
-        dispatch(addNote(doc.id, newNote));
+            dispatch(activeNote(doc.id, newNote));
+            dispatch(addNote(doc.id, newNote));
+        } catch (error) {
+            console.error(error);
+        }
+
     };
 };
 
@@ -55,6 +59,7 @@ export const addNote = (id, note) => ({
 
 export const startSaveNote = (note) => {
     return async (dispatch, getState) => {
+        console.log(note);
         const { uid } = getState().auth;
 
         if (!note.url) {
@@ -63,9 +68,7 @@ export const startSaveNote = (note) => {
 
         const noteToFirestore = { ...note };
         delete noteToFirestore.id;
-
         await db.doc(`${uid}/journal/notes/${note.id}`).update(noteToFirestore);
-
         dispatch(refreshNote(note.id, note));
 
         Swal.fire('Saved', note.title, 'success');
@@ -94,8 +97,9 @@ export const startUploading = (file) => {
                 Swal.showLoading();
             }
         });
-
+        console.log('fileUpload(file)', fileUpload(file));
         const fileUrl = await fileUpload(file);
+        console.log('fileUrl', fileUrl);
         activeNote.url = fileUrl;
         dispatch(startSaveNote(activeNote));
         Swal.close();
